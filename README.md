@@ -1,5 +1,16 @@
-# Vue 3 + TypeScript + Vite
+# k8s-estudos-frontend
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Este repositório faz parte de um conjunto de estudos sobre Kubernetes (K8s), ArgoCD, Keycloak e GitHub. O objetivo é aprender e demonstrar práticas de deploy automatizado e autenticação em aplicações frontend.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Repositórios relacionados
+- [k8s-estudos-backend](https://github.com/tadeubdev/k8s-estudos-backend)
+- [k8s-estudos-gitops](https://github.com/tadeubdev/k8s-estudos-gitops)
+
+## Tecnologias utilizadas
+- Kubernetes
+- ArgoCD
+- Keycloak
+- GitHub
+
+## Sobre o projeto
+Este repositório contém o código da aplicação frontend utilizada nos estudos de deploy e autenticação com Keycloak.
