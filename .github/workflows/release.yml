@@ -1,0 +1,64 @@
+name: Release Frontend
+
+on:
+  push:
+    tags:
+      - 'homolog-*'
+      - 'v*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/k8s-estudos-frontend:${{ github.ref_name }}
+
+      - name: Checkout gitops repo
+        uses: actions/checkout@v4
+        with:
+          repository: tadeubdev/k8s-estudos-gitops
+          path: gitops
+          token: ${{ secrets.PAT_GITHUB }}   # cria um PAT com permissão de repo
+
+      - name: Update image tag in overlay
+        run: |
+          TAG=${GITHUB_REF_NAME}
+          if [[ "$TAG" == homolog-* ]]; then
+            OVERLAY="homolog"
+          else
+            OVERLAY="prod"
+          fi
+
+          yq -i "
+            (.patches[] | select(.target.name == \"frontend\").patch) |= sub(\"__IMAGE_TAG__\", \"$TAG\")
+          " gitops/overlays/$OVERLAY/kustomization.yaml
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          path: gitops
+          commit-message: "chore(frontend): update image to ${{ github.ref_name }}"
+          branch: update-frontend-${{ github.ref_name }}
+          title: "Update frontend image to ${{ github.ref_name }}"
+          body: |
+            Atualiza o frontend para a imagem:
+            `ghcr.io/${{ github.repository_owner }}/k8s-estudos-frontend:${{ github.ref_name }}`
