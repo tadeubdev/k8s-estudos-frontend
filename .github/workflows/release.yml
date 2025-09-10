@@ -28,6 +28,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: ./Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/k8s-estudos-frontend:${{ github.ref_name }}
