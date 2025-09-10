@@ -38,7 +38,6 @@ jobs:
         with:
           repository: tadeubdev/k8s-estudos-gitops
           path: gitops
-          token: ${{ secrets.PAT_GITHUB }}   # cria um PAT com permissão de repo
 
       - name: Update image tag in overlay
         run: |
