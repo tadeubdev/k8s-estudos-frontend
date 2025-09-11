@@ -50,13 +50,13 @@ jobs:
           fi
 
           # Atualiza frontend
-          sed -i "s|__IMAGE_TAG__|$TAG|" gitops/overlays/$OVERLAY/kustomization.yaml
+          sed -i "s|\(ghcr.io.*/k8s-estudos-frontend:\).*|\1$TAG|" gitops/overlays/$OVERLAY/kustomization.yaml
 
           cd gitops
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add overlays/$OVERLAY/kustomization.yaml
-          git commit -m "chore: update frontend image to $TAG"
+          git commit -m "chore: update frontend image to $TAG" || echo "No changes to commit"
           git push https://x-access-token:${{ secrets.PAT_GITHUB }}@github.com/tadeubdev/k8s-estudos-gitops.git HEAD:main
 
       - name: Create Pull Request
