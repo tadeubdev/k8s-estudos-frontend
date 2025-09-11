@@ -48,9 +48,15 @@ jobs:
             OVERLAY="prod"
           fi
 
-          yq -i "
-            (.patches[] | select(.target.name == \"frontend\").patch) |= sub(\"__IMAGE_TAG__\", \"$TAG\")
-          " gitops/overlays/$OVERLAY/kustomization.yaml
+          # Atualiza frontend
+          sed -i "s|__IMAGE_TAG__|$TAG|" gitops/overlays/$OVERLAY/kustomization.yaml
+
+          cd gitops
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add overlays/$OVERLAY/kustomization.yaml
+          git commit -m "chore: update frontend image to $TAG"
+          git push https://x-access-token:${{ secrets.PAT_GITHUB }}@github.com/tadeubdev/k8s-estudos-gitops.git HEAD:main
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
