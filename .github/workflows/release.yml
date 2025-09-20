@@ -27,8 +27,8 @@ jobs:
       - name: Build & Push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./frontend
+          file: ./frontend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/k8s-estudos-frontend:${{ github.ref_name }}
@@ -62,6 +62,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.PAT_GITHUB }}
           path: gitops
           commit-message: "chore(frontend): update image to ${{ github.ref_name }}"
           branch: update-frontend-${{ github.ref_name }}
