@@ -27,8 +27,8 @@ jobs:
       - name: Build & Push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./frontend
+          file: ./frontend/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/k8s-estudos-frontend:${{ github.ref_name }}
@@ -38,7 +38,7 @@ jobs:
         with:
           repository: tadeubdev/k8s-estudos-gitops
           path: gitops
-          token: ${{ secrets.PAT_GITHUB }}   # cria um PAT com permissão de repo
+          token: ${{ secrets.PAT_GITHUB }}
 
       - name: Update image tag in overlay
         run: |
@@ -49,13 +49,20 @@ jobs:
             OVERLAY="prod"
           fi
 
-          yq -i "
-            (.patches[] | select(.target.name == \"frontend\").patch) |= sub(\"__IMAGE_TAG__\", \"$TAG\")
-          " gitops/overlays/$OVERLAY/kustomization.yaml
+          # Atualiza frontend
+          sed -i "s|\(ghcr.io.*/k8s-estudos-frontend:\).*|\1$TAG|" gitops/overlays/$OVERLAY/kustomization.yaml
+
+          cd gitops
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add overlays/$OVERLAY/kustomization.yaml
+          git commit -m "chore: update frontend image to $TAG" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.PAT_GITHUB }}@github.com/tadeubdev/k8s-estudos-gitops.git HEAD:main
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.PAT_GITHUB }}
           path: gitops
           commit-message: "chore(frontend): update image to ${{ github.ref_name }}"
           branch: update-frontend-${{ github.ref_name }}
